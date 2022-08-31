@@ -8,7 +8,6 @@ public enum PatientDetails {
 	DATE("Date"),
 	PATIENT_ID("Patient ID"),
 	GENDER("Gender"),
-	PATIENT_TYPE("Patient Type"),
 	REF_GROUP("Ref. group"),
 	AGE("Age"),
 	DRAW_DATE("Draw Date"),
@@ -16,7 +15,7 @@ public enum PatientDetails {
 	DELIVERY_DATE("Delivery Date"),
 	DELIVERY_TIME("Delivery Time"),
 	CLINICIAN("Clinician"),
-	OPERATOR("Operator");
+	COMMENT("Comment");
 	
 	private String fieldName;
 

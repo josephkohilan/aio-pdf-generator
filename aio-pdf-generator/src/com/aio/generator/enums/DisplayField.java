@@ -5,15 +5,14 @@ public enum DisplayField {
 	PATIENT_NAME("Patient Name"),
 	AGE("Age"),
 	GENDER("Gender"),
-	SAMPLE_ID("Sample ID"),
 	PATIENT_ID("Patient ID"),
-	PATIENT_TYPE("Patient Type"),
-	DATE("Date"),
 	REF_GROUP("Ref. group"),
-	COLLECTION_DATE("Collection Date Time"),
-	REPORTING_DATE("Reporting Date Time"),
-	CLINICIAN("Clinician"),
-	OPERATOR("Operator");
+	
+	DATE("Date"),
+	SAMPLE_ID("Sample ID"),
+	COLLECTION_DATE("Collection Date"),
+	REPORTING_DATE("Reporting Date"),
+	CLINICIAN("Clinician");
 	
 	private String displayName;
 
