@@ -75,7 +75,7 @@ public class PdfGenerator {
 			document.open();
 			document.newPage();
 			addRunningSections(document, CommonConstants.HEADER_PATH, CommonConstants.HEADER_POSITION);
-			// addHeaderSpace(document);
+			//addHeaderSpace(document);
 			addInfoTable(values, heading, document, String.format("%s %s", firstName, lastName), sampleId);
 			addValuesTable(values, heading, document);
 			addCommentBox(values, heading,  document);
