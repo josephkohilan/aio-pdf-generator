@@ -6,15 +6,17 @@ public class CommonConstants {
 	
 	public static final String COMMA = ",";
 	
-	public static final String HEADER_PATH = "images/report_header.jpeg";
+	public static final String HEADER_PATH = "images/report_header.jpg";
 	
-	public static final int HEADER_POSITION = 750;
+	public static final int HEADER_POSITION = 710;
 	
-	public static final String FOOTER_PATH = "images/report_footer.jpeg";
+	public static final String FOOTER_PATH = "images/report_footer.jpg";
 	
 	public static final int FOOTER_POSITION = 0;
 	
-	public static final String SIGN_PATH = "images/report_signature.jpeg";
+	public static final String DIRECTOR_SIGN_PATH = "images/director_signature.jpg";
+
+	public static final String PATHOLOGIST_SIGN_PATH = "images/pathologist_signature.jpg";
 	
 	public static final String PARAMETERS = "Parameters";
 	
@@ -26,8 +28,14 @@ public class CommonConstants {
 	
 	public static final String COMMENTS_TEXT = "Comments:";
 
-	public static final String APPROVAL_OFFICER = "Dr. M. Jane Esther M.B.B.S, MD(Micro), FID, PGDID";
-	
-	public static final String APPROVAL_TEXT = "Verified and Approved by";
+	public static final String DIRECTOR =
+			"Dr. M. Jane Esther M.B.B.S, MD(Micro), FID, PGDID\n" +
+			"Reg. No: 101823\n" +
+			"Consultant Microbiologist and Lab Director";
+
+	public static final String CONSULTANT_PATHOLOGIST =
+			"Dr. Ronald J Bosco M.B.B.S, MD(Pathology)\n" +
+					"Reg. No: 91237\n" +
+					"Consultant Pathologist";
 
 }

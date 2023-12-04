@@ -1,11 +1,6 @@
 package com.aio.generator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +9,6 @@ import com.aio.generator.enums.DisplayField;
 import com.aio.generator.enums.PatientDetails;
 import com.aio.generator.enums.ReferenceValue;
 import com.aio.generator.utils.CommonUtils;
-import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -29,42 +23,49 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.opencsv.CSVReader;
 
-import static com.aio.generator.constants.CommonConstants.COMMA;
+import static com.aio.generator.constants.CommonConstants.CONSULTANT_PATHOLOGIST;
+import static com.aio.generator.constants.CommonConstants.DIRECTOR;
 
 public class PdfGenerator {
 
 	public static void main(String[] args) {
 		File[] files = new File(".").listFiles();
-		String line;
 		for (File file : files) {
 			if (file.isFile() && file.getName().toLowerCase().endsWith(".csv")) {
-				try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+				try (CSVReader reader = new CSVReader(new FileReader(file))) {
+					Map<String, Integer> headings = new HashMap<>();
+					String [] line;
 					boolean headingIndex = true;
-					Map<String, Integer> heading = new HashMap<>();
-					while ((line = bufferedReader.readLine()) != null) {
-						if (headingIndex) {
-							processHeadings(line, heading);
-							headingIndex = false;
-						} else {
-							generatePdf(line.split(COMMA), heading);
+					while ((line = reader.readNext()) != null) {
+						int index = 0;
+						String[] values = headingIndex? null: new String[headings.size()];
+						for(String element : line) {
+							if (headingIndex) {
+								processHeadings(element, index, headings);
+							} else {
+								values[index] = CommonUtils.formatField(element);
+							}
+							index++;
 						}
+						if (!headingIndex) {
+							generatePdf(values, headings);
+						}
+						headingIndex = false;
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
 
-	private static void processHeadings(String line, Map<String, Integer> heading) {
-		String[] headings = line.split(COMMA);
-		for (int i = 0; i < headings.length; i++) {
-			heading.put(CommonUtils.formatField(headings[i]), i);
-		}
+	private static void processHeadings(String element, int index, Map<String, Integer> heading) {
+		heading.put(CommonUtils.formatField(element), index);
 	}
 
-	private static void generatePdf(String[] values, Map<String, Integer> heading) {
+	private static void generatePdf(String[] values, Map<String, Integer> heading) throws Exception {
 		String firstName = CommonUtils.formatField(values[heading.get(PatientDetails.FIRST_NAME.getFieldName())]);
 		String lastName = CommonUtils.formatField(values[heading.get(PatientDetails.LAST_NAME.getFieldName())]);
 		String sampleId = CommonUtils.formatField(values[heading.get(PatientDetails.SAMPLE_ID.getFieldName())]);
@@ -101,16 +102,19 @@ public class PdfGenerator {
 		infoTable.setHorizontalAlignment(Element.ALIGN_CENTER);
 		infoTable.setKeepTogether(true);
 
-		formatAndAddCell(createValueCell(DisplayField.PATIENT_NAME.getDisplayName()), infoTable, Element.ALIGN_LEFT,
-				false);
-		formatAndAddCell(createValueCell(patientName), infoTable, Element.ALIGN_LEFT, false);
+		formatAndAddCell(
+				createValueCell(DisplayField.PATIENT_NAME.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
+		formatAndAddCell(
+				createValueCell(patientName), infoTable, Element.ALIGN_LEFT, false);
 		
-		formatAndAddCell(createValueCell(DisplayField.DATE.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
+		formatAndAddCell(
+				createValueCell(DisplayField.DATE.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
 		formatAndAddCell(
 				createValueCell(CommonUtils.formatField(values[heading.get(PatientDetails.DATE.getFieldName())])),
 				infoTable, Element.ALIGN_LEFT, false);
 		
-		formatAndAddCell(createValueCell(DisplayField.AGE.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
+		formatAndAddCell(
+				createValueCell(DisplayField.AGE.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
 		formatAndAddCell(
 				createValueCell(CommonUtils.formatField(values[heading.get(PatientDetails.AGE.getFieldName())])),
 				infoTable, Element.ALIGN_LEFT, false);
@@ -119,7 +123,8 @@ public class PdfGenerator {
 				false);
 		formatAndAddCell(createValueCell(sampleId), infoTable, Element.ALIGN_LEFT, false);
 		
-		formatAndAddCell(createValueCell(DisplayField.GENDER.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
+		formatAndAddCell(
+				createValueCell(DisplayField.GENDER.getDisplayName()), infoTable, Element.ALIGN_LEFT, false);
 		formatAndAddCell(
 				createValueCell(CommonUtils.formatField(values[heading.get(PatientDetails.GENDER.getFieldName())])),
 				infoTable, Element.ALIGN_LEFT, false);
@@ -157,7 +162,7 @@ public class PdfGenerator {
 				infoTable, Element.ALIGN_LEFT, false);
 
 		Paragraph referenceTableParagraph = new Paragraph();
-		referenceTableParagraph.setSpacingBefore(50f);
+		referenceTableParagraph.setSpacingBefore(75f);
 		infoTable.setSpacingAfter(0f);
 		referenceTableParagraph.add(infoTable);
 		document.add(referenceTableParagraph);
@@ -211,7 +216,8 @@ public class PdfGenerator {
 		table.addCell(cell);
 	}
 
-	private static void addCommentBox(String[] values, Map<String, Integer> heading, Document document) throws DocumentException {
+	private static void addCommentBox(String[] values,
+									  Map<String, Integer> heading, Document document) throws Exception {
 		Paragraph commentHeading = new Paragraph(CommonConstants.COMMENTS_TEXT,
 				new Font(FontFamily.HELVETICA, 8.0f, Font.BOLD));
 		commentHeading.setSpacingBefore(20f);
@@ -227,32 +233,51 @@ public class PdfGenerator {
 		document.add(commentParagraph);
 	}
 
-	private static void addApproval(Document document) throws DocumentException, MalformedURLException, IOException {
-		Paragraph signatureParagraph = new Paragraph();
-		Image image = Image.getInstance(CommonConstants.SIGN_PATH);
-		image.scalePercent(10.5f);
-		image.setAlignment(Element.ALIGN_RIGHT);
-		image.setIndentationRight(70f);
-		signatureParagraph.add(image);
-		Paragraph approverNameParagraph = new Paragraph(CommonConstants.APPROVAL_OFFICER,
-				new Font(FontFamily.HELVETICA, 8.0f, Font.BOLD));
-		approverNameParagraph.setIndentationRight(30f);
-		approverNameParagraph.setAlignment(Element.ALIGN_RIGHT);
-		signatureParagraph.add(approverNameParagraph);
-		Paragraph approverTextPara = new Paragraph(CommonConstants.APPROVAL_TEXT,
-				new Font(FontFamily.HELVETICA, 8.0f, Font.BOLD));
-		approverTextPara.setSpacingBefore(3f);
-		approverTextPara.setIndentationRight(30f);
-		approverTextPara.setAlignment(Element.ALIGN_RIGHT);
-		signatureParagraph.add(approverTextPara);
-		document.add(signatureParagraph);
+	private static void addApproval(Document document) throws Exception {
+		PdfPTable approvalTable = new PdfPTable(2);
+		approvalTable.setWidthPercentage(90);
+		approvalTable.setSpacingBefore(0f);
+		approvalTable.setSpacingAfter(0f);
+		approvalTable.setHorizontalAlignment(Element.ALIGN_CENTER);
+		approvalTable.setKeepTogether(true);
+
+		Image consultantSignatureImage = Image.getInstance(CommonConstants.PATHOLOGIST_SIGN_PATH);
+		consultantSignatureImage.scalePercent(50f);
+		consultantSignatureImage.setAlignment(Element.ALIGN_CENTER);
+		PdfPCell consultantSignatureCell = new PdfPCell();
+		consultantSignatureCell.setBorderWidth(0);
+		consultantSignatureCell.addElement(consultantSignatureImage);
+		approvalTable.addCell(consultantSignatureCell);
+
+		Image directorSignatureImage = Image.getInstance(CommonConstants.DIRECTOR_SIGN_PATH);
+		directorSignatureImage.scalePercent(50f);
+		directorSignatureImage.setAlignment(Element.ALIGN_CENTER);
+		PdfPCell directorSignatureCell = new PdfPCell();
+		directorSignatureCell.setBorderWidth(0);
+		directorSignatureCell.addElement(directorSignatureImage);
+		approvalTable.addCell(directorSignatureCell);
+
+		PdfPCell pathologistDetailsCell = createValueCell(CONSULTANT_PATHOLOGIST);
+		pathologistDetailsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+		pathologistDetailsCell.setBorderWidth(0);
+		approvalTable.addCell(pathologistDetailsCell);
+
+		PdfPCell directorDetailsCell = createValueCell(DIRECTOR);
+		directorDetailsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+		directorDetailsCell.setBorderWidth(0);
+		approvalTable.addCell(directorDetailsCell);
+
+		Paragraph referenceTableParagraph = new Paragraph();
+		referenceTableParagraph.setSpacingBefore(5f);
+		approvalTable.setSpacingAfter(0f);
+		referenceTableParagraph.add(approvalTable);
+		document.add(referenceTableParagraph);
 
 	}
 
-	private static void addRunningSections(Document document, String imagePath, int position)
-			throws BadElementException, MalformedURLException, IOException, DocumentException {
+	private static void addRunningSections(Document document, String imagePath, int position) throws Exception {
 		Image image = Image.getInstance(imagePath);
-		image.scalePercent(66.0f);
+		image.scalePercent(24.0f);
 		image.setAbsolutePosition(0, position);
 		document.add(image);
 	}
