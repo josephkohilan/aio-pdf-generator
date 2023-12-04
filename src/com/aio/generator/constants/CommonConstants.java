@@ -4,8 +4,6 @@ public class CommonConstants {
 	
 	private CommonConstants() {}
 	
-	public static final String COMMA = ",";
-	
 	public static final String HEADER_PATH = "images/report_header.jpg";
 	
 	public static final int HEADER_POSITION = 710;
