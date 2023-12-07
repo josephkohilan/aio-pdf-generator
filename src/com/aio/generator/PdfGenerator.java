@@ -83,7 +83,7 @@ public class PdfGenerator {
 	private static void addHeaderSpace(Document document) throws DocumentException {
 		document.add(new Chunk());
 		Paragraph headerParagraph = new Paragraph();
-		headerParagraph.setSpacingBefore(60);
+		headerParagraph.setSpacingBefore(55);
 		document.add(headerParagraph);
 	}
 
