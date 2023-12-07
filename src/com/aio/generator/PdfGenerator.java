@@ -9,17 +9,8 @@ import com.aio.generator.enums.DisplayField;
 import com.aio.generator.enums.PatientDetails;
 import com.aio.generator.enums.ReferenceValue;
 import com.aio.generator.utils.CommonUtils;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
+import com.itextpdf.text.*;
 import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -75,13 +66,13 @@ public class PdfGenerator {
 			PdfWriter.getInstance(document, new FileOutputStream(fileName));
 			document.open();
 			document.newPage();
-			addRunningSections(document, CommonConstants.HEADER_PATH, CommonConstants.HEADER_POSITION);
-			//addHeaderSpace(document);
+			//addRunningSections(document, CommonConstants.HEADER_PATH, CommonConstants.HEADER_POSITION);
+			addHeaderSpace(document);
 			addInfoTable(values, heading, document, String.format("%s %s", firstName, lastName), sampleId);
 			addValuesTable(values, heading, document);
 			addCommentBox(values, heading,  document);
 			addApproval(document);
-			addRunningSections(document, CommonConstants.FOOTER_PATH, CommonConstants.FOOTER_POSITION);
+			//addRunningSections(document, CommonConstants.FOOTER_PATH, CommonConstants.FOOTER_POSITION);
 		} catch (IOException | DocumentException e) {
 			e.printStackTrace();
 		} finally {
@@ -90,7 +81,10 @@ public class PdfGenerator {
 	}
 
 	private static void addHeaderSpace(Document document) throws DocumentException {
-		document.add(Chunk.NEWLINE);
+		document.add(new Chunk());
+		Paragraph headerParagraph = new Paragraph();
+		headerParagraph.setSpacingBefore(60);
+		document.add(headerParagraph);
 	}
 
 	private static void addInfoTable(String[] values, Map<String, Integer> heading, Document document,
